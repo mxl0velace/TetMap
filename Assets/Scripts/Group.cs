@@ -6,6 +6,8 @@ public class Group : MonoBehaviour
 {
     float lastFall = 0;
     float dropTime = 1;
+    float lastMove = 0;
+    float moveTime = 0.2f;
     Player player;
     int maxBlockOffset = 2;
     // Use this for initialization
@@ -33,7 +35,9 @@ public class Group : MonoBehaviour
     {
         //Debug.Log("HANDLE MOVEMENT");
         // Move Left
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        Debug.Log(Input.GetAxis("Horizontal"));
+        if (Input.GetAxis("Horizontal") < 0 &&
+                Time.time - lastMove >= moveTime || Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
         {
             //Debug.Log("LEFT RECV");
             // Modify position
@@ -51,10 +55,12 @@ public class Group : MonoBehaviour
                 // It's not valid. revert.
                 transform.position += new Vector3(1, 0, 0);
             //Debug.Log("LEFT FAIL");
+            lastMove = Time.time;
         }
 
         // Move Right
-        else if (Input.GetKeyDown(KeyCode.RightArrow))
+        else if (Input.GetAxis("Horizontal") > 0 &&
+                Time.time - lastMove >= moveTime || Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D))
         {
             // Modify position
             transform.position += new Vector3(1, 0, 0);
@@ -72,10 +78,11 @@ public class Group : MonoBehaviour
             else
                 // It's not valid. revert.
                 transform.position += new Vector3(-1, 0, 0);
+            lastMove = Time.time;
         }
 
         // Rotate
-        if (Input.GetKeyDown(KeyCode.UpArrow))
+        if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W))
         {
             //Debug.Log(transform.position.ToString());
             transform.Rotate(0, 0, -90);
@@ -96,7 +103,7 @@ public class Group : MonoBehaviour
 
         // Move Downwards and Fall
         if (Input.GetKeyDown(KeyCode.DownArrow) ||
-                Time.time - lastFall >= dropTime)
+                Time.time - lastFall >= dropTime || Input.GetKeyDown(KeyCode.S))
         {
             // Modify position
             transform.position += new Vector3(0, -1, 0);
