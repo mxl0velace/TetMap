@@ -5,7 +5,7 @@ using UnityEngine;
 public class BlockGrid
 {
 
-    public static int w = 10;
+    public static int w = 50;
     public static int h = 20;
     public static Transform[,] grid = new Transform[w, h];
 
@@ -13,11 +13,9 @@ public class BlockGrid
     {
         return new Vector2(Mathf.Round(v.x), Mathf.Round(v.y));
     }
-    public static bool insideBorder(Vector2 pos)
+    public static bool atFloor(Vector2 pos)
     {
-        return ((int)pos.x >= 0 &&
-                (int)pos.x < w &&
-                (int)pos.y >= 0);
+        return (int)pos.y < 0;
     }
     public static void removeBlocks(int y)
     {
@@ -66,5 +64,4 @@ public class BlockGrid
             }
         }
     }
-
 }

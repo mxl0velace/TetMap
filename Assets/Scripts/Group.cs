@@ -6,6 +6,8 @@ public class Group : MonoBehaviour
 {
     float lastFall = 0;
     float dropTime = 1;
+    Player player;
+    int maxBlockOffset = 2;
     // Use this for initialization
     void Start()
     {
@@ -15,30 +17,40 @@ public class Group : MonoBehaviour
             Debug.Log("GAME OVER");
             Destroy(gameObject);
         }
+        player = FindObjectOfType<Player>();
+        updateSight();
     }
 
     // Update is called once per frame
     void Update()
     {
-		if (transform.childCount==0)
-		{
-			Destroy(gameObject);
-		}
+        if (transform.childCount == 0)
+        {
+            Destroy(gameObject);
+        }
     }
-	public void handleMovement(){
-		// Move Left
+    public void handleMovement()
+    {
+        //Debug.Log("HANDLE MOVEMENT");
+        // Move Left
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
+            //Debug.Log("LEFT RECV");
             // Modify position
             transform.position += new Vector3(-1, 0, 0);
 
             // See if valid
             if (isValidGridPos())
+            {
                 // It's valid. Update grid.
                 updateGrid();
+                player.transform.position += new Vector3(-1, 0, 0);
+                updateSight();
+            }
             else
                 // It's not valid. revert.
                 transform.position += new Vector3(1, 0, 0);
+            //Debug.Log("LEFT FAIL");
         }
 
         // Move Right
@@ -47,31 +59,43 @@ public class Group : MonoBehaviour
             // Modify position
             transform.position += new Vector3(1, 0, 0);
 
+
             // See if valid
             if (isValidGridPos())
+            {
                 // It's valid. Update grid.
                 updateGrid();
+                player.transform.position += new Vector3(1, 0, 0);
+                updateSight();
+
+            }
             else
                 // It's not valid. revert.
                 transform.position += new Vector3(-1, 0, 0);
         }
 
         // Rotate
-        else if (Input.GetKeyDown(KeyCode.UpArrow))
+        if (Input.GetKeyDown(KeyCode.UpArrow))
         {
+            //Debug.Log(transform.position.ToString());
             transform.Rotate(0, 0, -90);
 
             // See if valid
             if (isValidGridPos())
+            {
                 // It's valid. Update grid.
                 updateGrid();
+            }
             else
+            {
                 // It's not valid. revert.
                 transform.Rotate(0, 0, 90);
+                //Debug.Log("ROT FAIL");
+            }
         }
 
         // Move Downwards and Fall
-        else if (Input.GetKeyDown(KeyCode.DownArrow) ||
+        if (Input.GetKeyDown(KeyCode.DownArrow) ||
                 Time.time - lastFall >= dropTime)
         {
             // Modify position
@@ -92,23 +116,34 @@ public class Group : MonoBehaviour
                 BlockGrid.deleteFullRows();
 
                 // Spawn next Group
-                FindObjectOfType<Player>().spawnNext();
+                player.spawnNext();
 
             }
 
             lastFall = Time.time;
         }
-	}
+    }
     bool isValidGridPos()
     {
         foreach (Transform child in transform)
         {
             Vector2 v = BlockGrid.roundVec2(child.position);
 
-            // Not inside Border?
-            if (!BlockGrid.insideBorder(v))
+            // At floor?
+            if (BlockGrid.atFloor(v))
                 return false;
 
+            // If out of bounds, wrap around
+            if (v.x < 0)
+            {
+                v.x += BlockGrid.w;
+            }
+            if (v.x >= BlockGrid.w)
+            {
+                v.x -= BlockGrid.w;
+            }
+            //Debug.Log("x " + v.x);
+            //Debug.Log("y " + v.y);
             // Block in grid cell (and not part of same group)?
             if (BlockGrid.grid[(int)v.x, (int)v.y] != null &&
                 BlockGrid.grid[(int)v.x, (int)v.y].parent != transform)
@@ -129,7 +164,24 @@ public class Group : MonoBehaviour
         foreach (Transform child in transform)
         {
             Vector2 v = BlockGrid.roundVec2(child.position);
+            //If out of bounds, wrap around
+            if (v.x < 0)
+            {
+                v.x += BlockGrid.w;
+                //child.transform.position += new Vector3(BlockGrid.w,0);
+            }
+            if (v.x >= BlockGrid.w)
+            {
+                v.x -= BlockGrid.w;
+                //child.transform.position -= new Vector3(BlockGrid.w,0);
+            }
             BlockGrid.grid[(int)v.x, (int)v.y] = child;
         }
+    }
+    void updateSight()
+    {
+        transform.position = new Vector3((transform.position.x + BlockGrid.w) % BlockGrid.w, transform.position.y);
+        int minCameraX = player.camwidth / 2 + maxBlockOffset;
+        player.transform.position = new Vector3((transform.position.x - minCameraX + BlockGrid.w) % BlockGrid.w + minCameraX, player.transform.position.y);
     }
 }
