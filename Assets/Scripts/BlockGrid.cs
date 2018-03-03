@@ -25,6 +25,14 @@ public class BlockGrid
             grid[x, y] = null;
         }
     }
+    public static void removeSection(int start, int length, int y)
+    {
+        for (int x = 0; x < length; x++)
+        {
+            MonoBehaviour.Destroy(grid[(start + x) % w, y].gameObject);
+            grid[(start + x) % w, y] = null;
+        }
+    }
     public static void decreaseRow(int y)
     {
         for (int x = 0; x < w; ++x)
@@ -40,16 +48,47 @@ public class BlockGrid
             }
         }
     }
+    public static void decreaseSection(int start, int length, int y)
+    {
+        for (int x = 0; x < length; ++x)
+        {
+            if (grid[(start + x) % w, y] != null)
+            {
+                // Move one towards bottom
+                grid[(start + x) % w, y - 1] = grid[(start + x) % w, y];
+                grid[(start + x) % w, y] = null;
+
+                // Update Block position
+                grid[(start + x) % w, y - 1].position += new Vector3(0, -1, 0);
+            }
+        }
+    }
     public static void decreaseRowsAbove(int y)
     {
         for (int i = y; i < h; ++i)
             decreaseRow(i);
+    }
+    public static void decreaseSectionRowsAbove(int start, int length, int y)
+    {
+        for (int i = y; i < h; ++i)
+            decreaseSection(start, length, i);
     }
     public static bool isRowFull(int y)
     {
         for (int x = 0; x < w; ++x)
             if (grid[x, y] == null)
                 return false;
+        return true;
+    }
+    public static bool isSectionFull(int start, int length, int y)
+    {
+        for (int x = 0; x < length; ++x)
+        {
+            if (grid[start + x % w, y] == null)
+            {
+                return false;
+            }
+        }
         return true;
     }
     public static void deleteFullRows()
@@ -62,6 +101,33 @@ public class BlockGrid
                 decreaseRowsAbove(y + 1);
                 --y;
             }
+        }
+    }
+    public static void deleteFullSection(int secStart, int secLength)
+    {
+        for (int y = 0; y < h; y++)
+        {
+            if (isSectionFull(secStart, secLength, y))
+            {
+                removeSection(secStart, secLength, y);
+                decreaseSectionRowsAbove(secStart, secLength, y + 1);
+                --y;
+            }
+        }
+    }
+    public static void deleteFullSections(int start, int secLength, int maxBlockOffset)
+    {
+        int behind = (int)((Mathf.Floor((float)(start - maxBlockOffset) / secLength) * secLength) + w) % w;
+        deleteFullSection(behind, secLength);
+        int centre = (int)(Mathf.Floor((float)start / secLength) * secLength + w) % w;
+        if (centre != behind)
+        {
+            deleteFullSection(centre, secLength);
+        }
+        int front = (int)((Mathf.Floor((float)(start + maxBlockOffset) / secLength) * secLength) + w) % w;
+        if (front != centre)
+        {
+            deleteFullSection(front, secLength);
         }
     }
 }

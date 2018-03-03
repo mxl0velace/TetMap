@@ -39,3 +39,6 @@ sysinfo.txt
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+/Assets/VSCode
+/.vscode/launch.json
+/Assets/VSCode.meta
