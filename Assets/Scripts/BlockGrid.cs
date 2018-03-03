@@ -103,43 +103,31 @@ public class BlockGrid
             }
         }
     }
-    public static void deleteFullSections(int start, int secLength, int maxBlockOffset)
+    public static void deleteFullSection(int secStart, int secLength)
     {
-        int behind = (int)((Mathf.Floor((float)(start - maxBlockOffset) / secLength) * secLength) + w) % w;
         for (int y = 0; y < h; y++)
         {
-            if (isSectionFull(behind, secLength, y))
+            if (isSectionFull(secStart, secLength, y))
             {
-                removeSection(behind, secLength, y);
-                decreaseSectionRowsAbove(behind, secLength, y + 1);
+                removeSection(secStart, secLength, y);
+                decreaseSectionRowsAbove(secStart, secLength, y + 1);
                 --y;
             }
         }
+    }
+    public static void deleteFullSections(int start, int secLength, int maxBlockOffset)
+    {
+        int behind = (int)((Mathf.Floor((float)(start - maxBlockOffset) / secLength) * secLength) + w) % w;
+        deleteFullSection(behind, secLength);
         int centre = (int)(Mathf.Floor((float)start / secLength) * secLength + w) % w;
         if (centre != behind)
         {
-            for (int y = 0; y < h; y++)
-            {
-                if (isSectionFull(centre, secLength, y))
-                {
-                    removeSection(centre, secLength, y);
-                    decreaseSectionRowsAbove(centre, secLength, y + 1);
-                    --y;
-                }
-            }
+            deleteFullSection(centre, secLength);
         }
         int front = (int)((Mathf.Floor((float)(start + maxBlockOffset) / secLength) * secLength) + w) % w;
         if (front != centre)
         {
-            for (int y = 0; y < h; y++)
-            {
-                if (isSectionFull(front, secLength, y))
-                {
-                    removeSection(front, secLength, y);
-                    decreaseSectionRowsAbove(front, secLength, y + 1);
-                    --y;
-                }
-            }
+            deleteFullSection(front, secLength);
         }
     }
 }

@@ -121,7 +121,6 @@ public class Group : MonoBehaviour
 
                 // Clear filled horizontal lines
                 //BlockGrid.deleteFullRows();
-                Debug.Log("Calling deletion");
                 float x = BlockGrid.roundVec2(transform.position).x;
                 int sectionStart = Mathf.RoundToInt(x/secLength)*secLength;
                 BlockGrid.deleteFullSections(sectionStart,secLength,maxBlockOffset);
