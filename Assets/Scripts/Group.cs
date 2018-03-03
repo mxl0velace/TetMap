@@ -10,6 +10,7 @@ public class Group : MonoBehaviour
     float moveTime = 0.2f;
     Player player;
     int maxBlockOffset = 2;
+    int secLength = 10;
     // Use this for initialization
     void Start()
     {
@@ -35,7 +36,6 @@ public class Group : MonoBehaviour
     {
         //Debug.Log("HANDLE MOVEMENT");
         // Move Left
-        Debug.Log(Input.GetAxis("Horizontal"));
         if (Input.GetAxis("Horizontal") < 0 &&
                 Time.time - lastMove >= moveTime || Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
         {
@@ -120,7 +120,11 @@ public class Group : MonoBehaviour
                 transform.position += new Vector3(0, 1, 0);
 
                 // Clear filled horizontal lines
-                BlockGrid.deleteFullRows();
+                //BlockGrid.deleteFullRows();
+                Debug.Log("Calling deletion");
+                float x = BlockGrid.roundVec2(transform.position).x;
+                int sectionStart = Mathf.RoundToInt(x/secLength)*secLength;
+                BlockGrid.deleteFullSections(sectionStart,secLength,maxBlockOffset);
 
                 // Spawn next Group
                 player.spawnNext();
